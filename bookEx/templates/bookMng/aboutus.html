@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>About US</h1>
+  <p>Welcome to the Book Exchange System. This site lets students post books, browse listings,
+     and manage their own books.</p>
+
+  <h3>How it works</h3>
+  <ul>
+    <li>Post a book with name, web link, price and picture</li>
+    <li>Browse and view book details</li>
+    <li>Log in to see <em>My Books</em> and manage your listings</li>
+  </ul>
+
+  <p>If you have questions, contact the site admin.</p>
+{% endblock content %}

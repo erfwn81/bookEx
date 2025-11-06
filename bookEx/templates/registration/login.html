@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Log in</h1>
+  {% if form.errors %}
+    <p style="color:#c00;">Please check your username and password.</p>
+  {% endif %}
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Log in</button>
+  </form>
+  <p>New here? <a href="{% url 'register' %}">Create an account</a>.</p>
+{% endblock content %}

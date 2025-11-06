@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0"><i class="fas fa-book"></i> {{ book.name }}</h2>
+                    {% if user.is_authenticated %}
+                        <form action="{% url 'favorite_toggle' book.id %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link p-0" style="border: none; background: none;">
+                                <i class="{% if is_favorited %}fas{% else %}far{% endif %} fa-heart favorite-btn"></i>
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            {% if book.picture %}
+                                <img src="{{ book.picture.url }}" alt="{{ book.name }}" class="img-fluid rounded shadow">
+                            {% else %}
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center rounded" style="height: 250px;">
+                                    <i class="fas fa-book fa-5x"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <th><i class="fas fa-tag"></i> Price:</th>
+                                    <td>{% if book.price %}${{ book.price|floatformat:"2" }}{% else %}-{% endif %}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-calendar"></i> Published:</th>
+                                    <td>{{ book.publishdate }}</td>
+                                </tr>
+                                <tr>
+                                    <th><i class="fas fa-user"></i> Owner:</th>
+                                    <td>{% if book.username %}{{ book.username.username }}{% else %}-{% endif %}</td>
+                                </tr>
+                                {% if book.web %}
+                                <tr>
+                                    <th><i class="fas fa-link"></i> Website:</th>
+                                    <td><a href="{{ book.web }}" target="_blank">{{ book.web }}</a></td>
+                                </tr>
+                                {% endif %}
+                            </table>
+
+                            <!-- Average Rating Display -->
+                            <div class="mb-3">
+                                <strong><i class="fas fa-star text-warning"></i> Average Rating:</strong>
+                                <span class="badge bg-warning text-dark">
+                                    {% if avg_rating > 0 %}
+                                        {{ avg_rating|floatformat:1 }} / 5.0
+                                    {% else %}
+                                        No ratings yet
+                                    {% endif %}
+                                </span>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'cart_add' book.id %}" class="btn btn-success">
+                                    <i class="fas fa-cart-plus"></i> Add to Cart
+                                </a>
+                                <a href="/displaybooks" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left"></i> Back to Books
+                                </a>
+                                {% if user.is_authenticated and book.username_id == user.id %}
+                                    <a href="{% url 'book_delete' book.id %}" class="btn btn-danger">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rating Section -->
+            {% if user.is_authenticated %}
+            <div class="card mb-4">
+                <div class="card-header bg-warning">
+                    <h4 class="mb-0"><i class="fas fa-star"></i> Rate This Book</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="{% url 'rate_book' book.id %}" class="rating-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="stars" value="{% if user_rating %}{{ user_rating.stars }}{% else %}0{% endif %}">
+                        <div class="star-rating mb-2">
+                            {% for i in "12345" %}
+                                <i class="{% if user_rating and user_rating.stars >= forloop.counter %}fas{% else %}far{% endif %} fa-star" 
+                                   data-rating="{{ forloop.counter }}"></i>
+                            {% endfor %}
+                        </div>
+                        <p class="text-muted">
+                            {% if user_rating %}
+                                Your rating: {{ user_rating.stars }} star{{ user_rating.stars|pluralize }}
+                            {% else %}
+                                Click on a star to rate this book
+                            {% endif %}
+                        </p>
+                    </form>
+                </div>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> Please <a href="{% url 'login' %}?next={{ request.path }}">login</a> to rate this book.
+            </div>
+            {% endif %}
+
+            <!-- Comments Section -->
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h4 class="mb-0"><i class="fas fa-comments"></i> Comments ({{ comments.count }})</h4>
+                </div>
+                <div class="card-body">
+                    {% if user.is_authenticated %}
+                        <!-- Add Comment Form -->
+                        <form method="post" action="{% url 'add_comment' book.id %}" class="mb-4">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="comment_text" class="form-label"><strong>Add Your Comment:</strong></label>
+                                <textarea class="form-control" id="comment_text" name="comment_text" rows="3" 
+                                          placeholder="Share your thoughts about this book..." required maxlength="500"></textarea>
+                                <small class="form-text text-muted">Maximum 500 characters</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Post Comment
+                            </button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i> Please <a href="{% url 'login' %}?next={{ request.path }}">login</a> to add comments.
+                        </div>
+                    {% endif %}
+
+                    <!-- Display Comments -->
+                    {% if comments %}
+                        <h5 class="mt-4 mb-3">All Comments:</h5>
+                        {% for comment in comments %}
+                            <div class="comment-box">
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <span class="comment-author">
+                                            <i class="fas fa-user-circle"></i> {{ comment.user.username }}
+                                        </span>
+                                        <span class="comment-date ms-2">
+                                            <i class="fas fa-clock"></i> {{ comment.created_at|date:"M d, Y h:i A" }}
+                                        </span>
+                                    </div>
+                                    {% if user.is_authenticated and comment.user == user %}
+                                        <form method="post" action="{% url 'delete_comment' comment.id %}" style="display: inline;">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger" 
+                                                    onclick="return confirm('Delete this comment?')">
+                                                <i class="fas fa-trash-alt"></i>
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                                <p class="mt-2 mb-0">{{ comment.text }}</p>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted"><i>No comments yet. Be the first to comment!</i></p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar with additional info -->
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle"></i> Quick Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Book ID:</strong> #{{ book.id }}</p>
+                    <p><strong>Status:</strong> 
+                        <span class="badge bg-success">Available</span>
+                    </p>
+                    {% if is_favorited %}
+                        <p><i class="fas fa-heart text-danger"></i> <strong>In your favorites</strong></p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Tip Card -->
+            <div class="card mt-3">
+                <div class="card-body bg-light">
+                    <h6><i class="fas fa-lightbulb text-warning"></i> <strong>Tip:</strong></h6>
+                    <p class="small mb-0">
+                        Add this book to your favorites to easily find it later!
+                        Rate and comment to help other students make informed decisions.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
