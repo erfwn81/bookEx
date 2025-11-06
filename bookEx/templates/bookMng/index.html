@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Hero Section -->
+    <div class="jumbotron bg-primary text-white p-5 rounded mb-5">
+        <h1 class="display-4"><i class="fas fa-book-reader"></i> Welcome to Book Exchange System</h1>
+        <p class="lead">Your one-stop platform for buying, selling, and exchanging books with fellow students!</p>
+        <hr class="my-4 bg-white">
+        <p>Browse thousands of books, rate and comment on your favorites, and build your personal collection.</p>
+        <div class="mt-4">
+            <a class="btn btn-light btn-lg me-2" href="/displaybooks" role="button">
+                <i class="fas fa-book-open"></i> Browse Books
+            </a>
+            <a class="btn btn-outline-light btn-lg" href="/postbook" role="button">
+                <i class="fas fa-plus"></i> Post a Book
+            </a>
+        </div>
+    </div>
+
+    <!-- Feature Cards -->
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-search fa-3x text-primary mb-3"></i>
+                    <h4 class="card-title">Search Books</h4>
+                    <p class="card-text">Find exactly what you're looking for with our powerful search feature. Search by title, author, or website.</p>
+                    <a href="/search" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Start Searching
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h4 class="card-title">Rate & Review</h4>
+                    <p class="card-text">Share your opinions! Rate books with 1-5 stars and leave detailed comments to help others make informed decisions.</p>
+                    {% if user.is_authenticated %}
+                        <a href="/displaybooks" class="btn btn-warning">
+                            <i class="fas fa-star"></i> Rate Books
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-warning">
+                            <i class="fas fa-sign-in-alt"></i> Login to Rate
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card h-100 text-center shadow-sm">
+                <div class="card-body">
+                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                    <h4 class="card-title">Favorite Books</h4>
+                    <p class="card-text">Keep track of books you love! Add books to your favorites list for quick access and future reference.</p>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'favorites_list' %}" class="btn btn-danger">
+                            <i class="fas fa-heart"></i> My Favorites
+                        </a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-danger">
+                            <i class="fas fa-sign-in-alt"></i> Login for Favorites
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Features -->
+    <div class="row mb-5">
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4><i class="fas fa-shopping-cart text-success"></i> Shopping Cart</h4>
+                    <p>Add multiple books to your cart and manage your purchases easily. View your cart anytime to see what you're interested in.</p>
+                    <a href="/cart" class="btn btn-success">
+                        <i class="fas fa-shopping-cart"></i> View Cart
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h4><i class="fas fa-comments text-info"></i> Community Comments</h4>
+                    <p>Join the conversation! Read what other students think about books and share your own insights and experiences.</p>
+                    <a href="/displaybooks" class="btn btn-info">
+                        <i class="fas fa-comments"></i> Join Discussion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="card mb-5">
+        <div class="card-header bg-dark text-white">
+            <h3 class="mb-0"><i class="fas fa-info-circle"></i> How It Works</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 text-center mb-3">
+                    <div class="mb-3">
+                        <i class="fas fa-user-plus fa-3x text-primary"></i>
+                    </div>
+                    <h5>1. Sign Up</h5>
+                    <p class="text-muted">Create your free account to get started</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="mb-3">
+                        <i class="fas fa-book fa-3x text-success"></i>
+                    </div>
+                    <h5>2. Post Books</h5>
+                    <p class="text-muted">List books you want to sell or exchange</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="mb-3">
+                        <i class="fas fa-search fa-3x text-warning"></i>
+                    </div>
+                    <h5>3. Browse & Search</h5>
+                    <p class="text-muted">Find books that interest you</p>
+                </div>
+                <div class="col-md-3 text-center mb-3">
+                    <div class="mb-3">
+                        <i class="fas fa-handshake fa-3x text-info"></i>
+                    </div>
+                    <h5>4. Connect</h5>
+                    <p class="text-muted">Rate, comment, and add to favorites</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    {% if not user.is_authenticated %}
+    <div class="alert alert-primary text-center py-4">
+        <h4><i class="fas fa-rocket"></i> Ready to Get Started?</h4>
+        <p>Join our community today and start exploring amazing books!</p>
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg me-2">
+            <i class="fas fa-sign-in-alt"></i> Login
+        </a>
+        <a href="#" class="btn btn-outline-primary btn-lg">
+            <i class="fas fa-user-plus"></i> Register
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+    .jumbotron {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+</style>
+{% endblock content %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Display Books</h1>
+
+  {% if books %}
+    <table border="1" cellpadding="6" cellspacing="0">
+      <tr>
+        <th>Cover</th>
+        <th>Book Name</th>
+        <th>Book Price</th>
+        <th>User Name</th>
+        <th>Actions</th>
+      </tr>
+
+      {% for b in books %}
+        <tr>
+          <td style="text-align:center; width:80px;">
+            {% if b.picture %}
+              <img src="{{ b.picture.url }}" alt="{{ b.name }}" style="max-width:60px; max-height:60px;">
+            {% else %}
+              <span style="color:#888;">No cover</span>
+            {% endif %}
+          </td>
+          <td>
+            <a href="{% url 'book_detail' b.id %}">{{ b.name }}</a>
+          </td>
+          <td>
+            {% if b.price %}${{ b.price|floatformat:"2" }}{% else %}-{% endif %}
+          </td>
+          <td>
+            {% if b.username %}{{ b.username.username }}{% else %}-{% endif %}
+          </td>
+          <td>
+            <a href="{% url 'cart_add' b.id %}">Add to cart</a>
+            {% if user.is_authenticated and b.username_id == user.id %}
+              &nbsp;|&nbsp; <a href="{% url 'book_delete' b.id %}">DELETE</a>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+    </table>
+  {% else %}
+    <p>No books available.</p>
+  {% endif %}
+{% endblock content %}

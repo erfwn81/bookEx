@@ -1,0 +1,243 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Exchange System</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'base.css' %}" type="text/css">
+    
+    <style>
+        /* Star rating styles */
+        .star-rating {
+            display: inline-block;
+            font-size: 1.2em;
+            color: #ffc107;
+        }
+        .star-rating .fa-star {
+            cursor: pointer;
+        }
+        .star-rating .fa-star:hover,
+        .star-rating .fa-star.active {
+            color: #ff9800;
+        }
+        
+        /* Comment section styles */
+        .comment-box {
+            background-color: #f8f9fa;
+            border-left: 3px solid #007bff;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .comment-author {
+            font-weight: bold;
+            color: #007bff;
+        }
+        .comment-date {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+        
+        /* Favorite icon */
+        .favorite-btn {
+            color: #dc3545;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .favorite-btn:hover {
+            color: #c82333;
+        }
+        
+        /* Messages styling */
+        .messages {
+            margin: 15px 0;
+        }
+        
+        /* Card styling for books */
+        .book-card {
+            transition: transform 0.2s;
+        }
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Bootstrap Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-book"></i> Book Exchange
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    {% block navbar %}
+                        {% for item in item_list %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ item.link }}">{{ item.item }}</a>
+                            </li>
+                        {% endfor %}
+                    {% endblock navbar %}
+                </ul>
+                
+                <!-- Search form in navbar -->
+                <form class="d-flex me-3" method="get" action="{% url 'search' %}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Search books..." style="width: 250px;">
+                    <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <!-- User authentication section -->
+                <ul class="navbar-nav">
+                    {% if user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/mybooks"><i class="fas fa-book-open"></i> My Books</a></li>
+                                <li><a class="dropdown-item" href="{% url 'favorites_list' %}"><i class="fas fa-heart"></i> Favorites</a></li>
+                                <li><a class="dropdown-item" href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'logout' %}?next=/" method="post" class="px-3">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger w-100">
+                                            <i class="fas fa-sign-out-alt"></i> Logout
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}?next=/">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Messages Display -->
+    {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- Sidebar (can be kept for additional navigation if needed) -->
+            {% if show_sidebar %}
+            <nav class="col-md-2 d-md-block bg-light sidebar">
+                <div class="position-sticky pt-3">
+                    <ul class="nav flex-column">
+                        {% block sidenav %}
+                            {% for item in item_list %}
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ item.link }}">
+                                        {{ item.item }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        {% endblock sidenav %}
+                    </ul>
+                </div>
+            </nav>
+            {% endif %}
+
+            <!-- Main content area -->
+            <main class="col-md-{% if show_sidebar %}10{% else %}12{% endif %} ms-sm-auto px-md-4">
+                {% block content %}
+                    <h1>Welcome to Book Exchange System</h1>
+                {% endblock content %}
+            </main>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3 mt-5">
+        <p class="mb-0">&copy; 2025 Book Exchange System | Built with Bootstrap 5</p>
+    </footer>
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Star rating JavaScript -->
+    <script>
+        // Star rating functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const ratingForms = document.querySelectorAll('.rating-form');
+            ratingForms.forEach(form => {
+                const stars = form.querySelectorAll('.star-rating .fa-star');
+                const input = form.querySelector('input[name="stars"]');
+                
+                stars.forEach((star, index) => {
+                    star.addEventListener('click', function() {
+                        const rating = index + 1;
+                        input.value = rating;
+                        
+                        // Update visual feedback
+                        stars.forEach((s, i) => {
+                            if (i < rating) {
+                                s.classList.add('active', 'fas');
+                                s.classList.remove('far');
+                            } else {
+                                s.classList.remove('active', 'fas');
+                                s.classList.add('far');
+                            }
+                        });
+                        
+                        // Submit form
+                        form.submit();
+                    });
+                    
+                    star.addEventListener('mouseover', function() {
+                        stars.forEach((s, i) => {
+                            if (i <= index) {
+                                s.classList.add('fas');
+                                s.classList.remove('far');
+                            }
+                        });
+                    });
+                });
+                
+                form.addEventListener('mouseleave', function() {
+                    const currentRating = parseInt(input.value) || 0;
+                    stars.forEach((s, i) => {
+                        if (i < currentRating) {
+                            s.classList.add('fas');
+                            s.classList.remove('far');
+                        } else {
+                            s.classList.remove('fas');
+                            s.classList.add('far');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

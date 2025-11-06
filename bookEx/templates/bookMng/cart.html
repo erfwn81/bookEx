@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block sidenav %}
+  {% for item in item_list %}
+    <li><a href="{{ item.link }}">{{ item.item }}</a></li>
+  {% endfor %}
+{% endblock sidenav %}
+
+{% block content %}
+  <h1>Your Cart</h1>
+
+  {% if rows %}
+    <table>
+      <tr>
+        <th>Book</th>
+        <th>Qty</th>
+        <th>Line</th>
+        <th></th>
+      </tr>
+      {% for r in rows %}
+        <tr>
+          <td><a href="{% url 'book_detail' r.book.id %}">{{ r.book.name }}</a></td>
+          <td>{{ r.qty }}</td>
+          <td>${{ r.line }}</td>
+          <td><a href="{% url 'cart_remove' r.book.id %}">Remove</a></td>
+        </tr>
+      {% endfor %}
+    </table>
+
+    <p><strong>Total:</strong> ${{ total }}</p>
+    <p><a href="{% url 'cart_clear' %}">Clear cart</a></p>
+  {% else %}
+    <p>Cart is empty.</p>
+  {% endif %}
+{% endblock content %}
