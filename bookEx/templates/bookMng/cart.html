@@ -7,29 +7,57 @@
 {% endblock sidenav %}
 
 {% block content %}
+<div class="container mt-4">
+  <div class="container mt-4">
+  <div class="text-center mb-4">
   <h1>Your Cart</h1>
+</div>
 
   {% if rows %}
-    <table>
-      <tr>
-        <th>Book</th>
-        <th>Qty</th>
-        <th>Line</th>
-        <th></th>
-      </tr>
-      {% for r in rows %}
+  <div class="card shadow p-4 rounded-4">
+    <table class="table table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Book</th>
+          <th>Quantity</th>
+          <th>Line</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
         <tr>
           <td><a href="{% url 'book_detail' r.book.id %}">{{ r.book.name }}</a></td>
-          <td>{{ r.qty }}</td>
+          <td>
+  <div class="d-flex align-items-center">
+    <form method="post" action="{% url 'cart_decrease' r.book.id %}" class="me-2">
+      {% csrf_token %}
+      <button class="btn btn-outline-secondary btn-sm">−</button>
+    </form>
+
+    <span class="mx-2">{{ r.qty }}</span>
+
+    <form method="post" action="{% url 'cart_increase' r.book.id %}" class="ms-2">
+      {% csrf_token %}
+      <button class="btn btn-outline-secondary btn-sm">+</button>
+    </form>
+  </div>
+</td>
           <td>${{ r.line }}</td>
-          <td><a href="{% url 'cart_remove' r.book.id %}">Remove</a></td>
+          <td><a class="btn btn-danger btn-sm" href="{% url 'cart_remove' r.book.id %}">Remove</a></td>
         </tr>
-      {% endfor %}
+        {% endfor %}
+      </tbody>
     </table>
 
-    <p><strong>Total:</strong> ${{ total }}</p>
-    <p><a href="{% url 'cart_clear' %}">Clear cart</a></p>
+    <div class="d-flex justify-content-between mt-3">
+      <h4><strong>Total:</strong> ${{ total }}</h4>
+      <a class="btn btn-warning" href="{% url 'cart_clear' %}">Clear Cart</a>
+    </div>
+  </div>
   {% else %}
-    <p>Cart is empty.</p>
+  <div class="alert alert-info text-center">Your cart is empty.</div>
   {% endif %}
+</div>
+</div>
 {% endblock content %}
