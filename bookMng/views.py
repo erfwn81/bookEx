@@ -202,6 +202,34 @@ def cart_clear(request):
     request.session.modified = True
     return HttpResponseRedirect("/cart")
 
+# ========= Cart Quantity Update =========
+
+def cart_increase(request, book_id):
+    """Increase quantity of a book in the cart by 1"""
+    if request.method == "POST":
+        cart = _get_cart(request)
+        cart[str(book_id)] = int(cart.get(str(book_id), 0)) + 1
+        request.session.modified = True
+    return HttpResponseRedirect("/cart")
+
+
+def cart_decrease(request, book_id):
+    """Decrease quantity, removing item if it hits 0"""
+    if request.method == "POST":
+        cart = _get_cart(request)
+        current_qty = int(cart.get(str(book_id), 0))
+
+        if current_qty > 1:
+            cart[str(book_id)] = current_qty - 1
+        else:
+            # If quantity becomes 0, remove the item
+            cart.pop(str(book_id), None)
+
+        request.session.modified = True
+
+    return HttpResponseRedirect("/cart")
+
+
 
 # ========= Comments =========
 
