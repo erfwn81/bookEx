@@ -20,6 +20,8 @@ urlpatterns = [
     path("cart/add/<int:book_id>", views.cart_add, name="cart_add"),
     path("cart/remove/<int:book_id>", views.cart_remove, name="cart_remove"),
     path("cart/clear", views.cart_clear, name="cart_clear"),
+    path("cart/increase/<int:book_id>/", views.cart_increase, name="cart_increase"),
+    path("cart/decrease/<int:book_id>/", views.cart_decrease, name="cart_decrease"),
 
     # Comments (NEW)
     path("comment/add/<int:book_id>", views.add_comment, name="add_comment"),
